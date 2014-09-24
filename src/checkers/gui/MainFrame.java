@@ -51,8 +51,8 @@ public class MainFrame extends JFrame {
    private static final int LEVEL1 = 3;
    private static final int LEVEL2 = 5;
    private static final int LEVEL3 = 8;
-   private int thinkDepth1 = LEVEL2; 
-   private int thinkDepth2 = LEVEL2;// Default.
+   private int thinkDepth1 = LEVEL1; 
+   private int thinkDepth2 = LEVEL3;// Default.
    
    // States.
    private static final int FROM = 1;  
@@ -68,13 +68,13 @@ public class MainFrame extends JFrame {
    private static final int MINIMAX=1;
    private static final int MINIMAXAB=2;
    private static final int RANDOM=3;
-   private int strategyP1=RANDOM;//the default should be MINIMAXAB
+   private int strategyP1=MINIMAXAB;//the default should be MINIMAXAB
    private int strategyP2=RANDOM; 
    
    //Game Type
    private static final int USER_VS_MACHINE=1;
    private static final int MACHINE_VS_MACHINE=2;
-   private int gameType = USER_VS_MACHINE;
+   private int gameType = USER_VS_MACHINE;//the default should be UvsM
    private int currentTurn = Checker.WHITE;
 
    private int nextTurn(int currentTurn){
@@ -207,6 +207,11 @@ public class MainFrame extends JFrame {
       getContentPane().add(mainPanel, BorderLayout.CENTER);
       getContentPane().add(scrollOutputPane, BorderLayout.SOUTH);
       enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+      
+      
+      //SOME TEST
+      System.out.println("player1:"+player1Color+"  "+thinkDepth1);
+      System.out.println("player2:"+player2Color+"  "+thinkDepth2);
    }
    
    
@@ -283,13 +288,13 @@ public class MainFrame extends JFrame {
     * from the CheckerButton class.
     */
    public void handleButtonEvents(Coordinate c) {
-	   System.out.println("handleButtonEvents !!!!");
-      if (state == NOT_STARTED)
-         outputText("Please choose begin game fra the menu.");
-      else   
-    	  if (gameType == USER_VS_MACHINE){
-	         if (state == COMPUTER_THINKS)
-	            outputText("You cannot move while the computer is thinking.");
+	  System.out.println("handleButtonEvents !!!!"+currentTurn);
+	  if (gameType == USER_VS_MACHINE){
+		 if (state == NOT_STARTED)
+		         outputText("Please choose begin game fra the menu.");
+		 else
+			 if (state == COMPUTER_THINKS)
+				 outputText("You cannot move while the computer is thinking.");
 	         else 
 	            switch(state) {
 	               case FROM:
@@ -307,12 +312,13 @@ public class MainFrame extends JFrame {
 	                  multipleJumps(from, c);
 	                  break;
 	            }        
-    	  }else{
-    		  if (state == COMPUTER_THINKS)
-  	            outputText("You cannot move while the computer is thinking.");
-    		  else
-    			  computerMovesGeneral(currentTurn);
-    	  }
+	  }else{
+		  if (state == COMPUTER_THINKS)
+            outputText("You cannot move while the computer is thinking.");
+		  else
+			  computerMovesGeneral(currentTurn);
+		  state = FROM;
+	  }
    }
    public void computerMovesGeneral(int currentTurn){
 	   int strategy;
@@ -366,9 +372,16 @@ public class MainFrame extends JFrame {
          this.currentTurn = nextTurn(currentTurn);
          validMoves = Rules.findAllValidMoves(board, this.currentTurn);
          if (validMoves.size() == 0) {
-            JOptionPane.showMessageDialog((Component)this, "Sorry! " +
-            "The computer wins.", "Checkers", JOptionPane.INFORMATION_MESSAGE);
-            outputText("Sorry. The computer wins.");
+        	 String mensj;
+        	 if (nextTurn(this.currentTurn) == player1Color)
+        		 mensj = "White";
+        	 else
+        		 mensj = "Black";
+        	mensj="Player "+mensj+
+        			" Wins!! ThinkDepth:" + thinkDepth; 
+            JOptionPane.showMessageDialog((Component)this, mensj,
+            		"Checkers", JOptionPane.INFORMATION_MESSAGE);
+            outputText(mensj);
             state = NOT_STARTED;
          }
       }           
@@ -410,9 +423,16 @@ public class MainFrame extends JFrame {
 	         this.currentTurn = nextTurn(currentTurn);
 	         validMoves = Rules.findAllValidMoves(board, this.currentTurn);
 	         if (validMoves.size() == 0) {
-	            JOptionPane.showMessageDialog((Component)this, "Sorry! " +
-	            "The computer wins.", "Checkers", JOptionPane.INFORMATION_MESSAGE);
-	            outputText("Sorry. The computer wins.");
+	        	 String mensj;
+	        	 if (nextTurn(this.currentTurn) == player1Color)
+	        		 mensj = "White";
+	        	 else
+	        		 mensj = "Black";
+	        	mensj="Player "+mensj+
+	        			" Wins!! ThinkDepth:" + thinkDepth; 
+	            JOptionPane.showMessageDialog((Component)this, mensj,
+	            		"Checkers", JOptionPane.INFORMATION_MESSAGE);
+	            outputText(mensj);
 	            state = NOT_STARTED;
 	         }
 	      }           
@@ -445,7 +465,9 @@ public class MainFrame extends JFrame {
 	         }
 	         String moves = "";
 	         while (iterator.hasNext()) {
-	            moves = moves + iterator.next();
+	        	 newMove = iterator.next();
+	            moves = moves + newMove;
+	            board = Rules.executeMove(newMove, board);
 	            updateGrid();
 	            if (iterator.hasNext()) moves = moves + " , ";
 	         }      
@@ -454,9 +476,22 @@ public class MainFrame extends JFrame {
 	         this.currentTurn = nextTurn(currentTurn);
 	         validMoves = Rules.findAllValidMoves(board, this.currentTurn);
 	         if (validMoves.size() == 0) {
-	            JOptionPane.showMessageDialog((Component)this, "Sorry! " +
-	            "The computer wins.", "Checkers", JOptionPane.INFORMATION_MESSAGE);
-	            outputText("Sorry. The computer wins.");
+	        	 int thinkDepth;
+		    	  if (currentTurn==player1Color)
+		    		  thinkDepth=thinkDepth1;
+		    	  else
+		    		  thinkDepth=thinkDepth2;
+		    	  
+	        	 String mensj;
+	        	 if (nextTurn(this.currentTurn) == player1Color)
+	        		 mensj = "White";
+	        	 else
+	        		 mensj = "Black";
+	        	mensj="Player "+mensj+
+	        			" Wins!! ThinkDepth:" + thinkDepth; 
+	            JOptionPane.showMessageDialog((Component)this, mensj,
+	            		"Checkers", JOptionPane.INFORMATION_MESSAGE);
+	            outputText(mensj);
 	            state = NOT_STARTED;
 	         }
 	      }           
@@ -658,7 +693,8 @@ public class MainFrame extends JFrame {
             seenStartDialog = true;  
          }
          if(gameType==MACHINE_VS_MACHINE){
-            
+            currentTurn = Checker.WHITE;
+            computerMovesGeneral(currentTurn);
          }
          else {
             outputText("Please make the first move");
